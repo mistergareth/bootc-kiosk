@@ -19,6 +19,19 @@ RUN dnf install -y --setopt=install_weak_deps=False \
     openscap-scanner \
     scap-security-guide
 
+# Fix for a base OS image quirk where /home may be a file, not a dir
+RUN rm -f /home && mkdir -p /home && chown root:root /home && chmod 755 /home
+
+# Apply DISA STIG security hardening profile using OpenSCAP
+# SELinux in enforcing mode + broad system hardening
+# Note: May conflict with root SSH password login — test and adjust if needed
+RUN oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_stig \
+    --remediate \
+    /usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml
+
+# Remove OpenSCAP tools after remediation to keep image lightweight
+RUN dnf remove -y openscap-scanner scap-security-guide && \
+
 # Add official Google Chrome repository and install latest stable version)
 RUN cat <<EOF > /etc/yum.repos.d/google-chrome.repo
 [google-chrome]
@@ -31,20 +44,6 @@ EOF && \
     # Install google-chrome-stable
     dnf install -y --setopt=install_weak_deps=False google-chrome-stable
 
-# Apply DISA STIG security hardening profile using OpenSCAP
-# SELinux in enforcing mode + broad system hardening
-# Note: May conflict with root SSH password login — test and adjust if needed
-RUN oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_stig \
-    --remediate \
-    /usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml
-
-# Remove OpenSCAP tools after remediation to keep image lightweight
-RUN dnf remove -y openscap-scanner scap-security-guide && \
-
-# Clean up any left over dnf junk files after installs to reduce image size
-RUN dnf autoremove -y && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf/*
 
 # Create the kiosk user "agent" with home directory
 RUN useradd -m agent
@@ -75,6 +74,11 @@ RUN systemctl set-default graphical.target
 
 # Enable SSH server for remote access during testing
 RUN systemctl enable sshd
+
+# Clean up any left over dnf junk files after installs to reduce image size
+RUN dnf autoremove -y && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf/*
 
 # Set root password to "redhat" (testing only! STIG will override in production)
 RUN echo "redhat" | passwd --stdin root
