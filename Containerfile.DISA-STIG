@@ -15,25 +15,22 @@ RUN dnf install -y --setopt=install_weak_deps=False \
     adwaita-icon-theme \
     adwaita-cursor-theme \
     NetworkManager-wifi \
-    openssh-server #\
-#    openscap-scanner \
-#    scap-security-guide
+    openssh-server \
+    openscap-scanner \
+    scap-security-guide
 
 # Fix for a base OS image quirk where /home may be a file, not a dir
 RUN rm -f /home && mkdir -p /home && chown root:root /home && chmod 755 /home
 
-##------ The DISA STIG hardening removes GDM and bunch of other ------##
-##       stuff that breaks functionality we need.
-##
-## Apply DISA STIG security hardening profile using OpenSCAP
-## SELinux in enforcing mode + broad system hardening
-## Note: May conflict with root SSH password login — test and adjust if needed
-#RUN oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_stig \
-#    --remediate \
-#    /usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml
+# Apply DISA STIG security hardening profile using OpenSCAP
+# SELinux in enforcing mode + broad system hardening
+# Note: May conflict with root SSH password login — test and adjust if needed
+RUN oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_stig \
+    --remediate \
+    /usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml
 
-## Remove OpenSCAP tools after remediation to keep image lightweight
-#RUN dnf remove -y openscap-scanner scap-security-guide && \
+# Remove OpenSCAP tools after remediation to keep image lightweight
+RUN dnf remove -y openscap-scanner scap-security-guide && \
 
 # Add official Google Chrome repository and install latest stable version)
 RUN cat <<EOF > /etc/yum.repos.d/google-chrome.repo
