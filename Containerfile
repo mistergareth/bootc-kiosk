@@ -12,7 +12,6 @@ RUN dnf install -y --setopt=install_weak_deps=False \
     xorg-x11-server-Xwayland \
     mutter \
     gnome-control-center \
-    gnome-terminal \
     adwaita-icon-theme \
     adwaita-cursor-theme \
     NetworkManager-wifi \
