@@ -17,8 +17,7 @@ RUN dnf install -y --setopt=install_weak_deps=False \
     NetworkManager-wifi \
     openssh-server \
     openscap-scanner \
-    scap-security-guide \
-    && \
+    scap-security-guide
 
 # Add official Google Chrome repository and install latest stable version)
 RUN cat <<EOF > /etc/yum.repos.d/google-chrome.repo
