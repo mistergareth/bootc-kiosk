@@ -28,11 +28,8 @@ enabled=1
 gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
 EOF && \
-    dnf install -y --setopt=install_weak_deps=False google-chrome-stable && \
-    # Clean up to reduce image size
-    dnf autoremove -y && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf
+    # Install google-chrome-stable
+    dnf install -y --setopt=install_weak_deps=False google-chrome-stable
 
 # Apply DISA STIG security hardening profile using OpenSCAP
 # SELinux in enforcing mode + broad system hardening
