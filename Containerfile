@@ -49,7 +49,9 @@ EOF && \
 
 
 # Create the kiosk user "agent" with home directory
-RUN useradd -m agent
+# Set a basic password for agent (required for GDM auto-login to work reliably)
+# Use "agent" here – change to something stronger if desired
+RUN useradd -m agent && echo "agent:agent" | chpasswd
 
 # Configure auto-login for "agent" user in GDM
 RUN mkdir -p /etc/gdm && \
@@ -57,7 +59,16 @@ RUN mkdir -p /etc/gdm && \
 [daemon]
 AutomaticLoginEnable=True
 AutomaticLogin=agent
+
+# testing only! Remove this section for production image
+[security]
+DisableRoot=false
 EOF
+
+##---- Keeping this as an example if needed to do separately ----##
+## Enable root login at GDM graphical screen (testing only!)
+#RUN sed -i '/^\[security\]/a DisableRoot=false' /etc/gdm/custom.conf || \
+#    echo "[security]\nDisableRoot=false" >> /etc/gdm/custom.conf
 
 # Set Chrome browser to autostart in kiosk mode as "agent" user
 RUN mkdir -p /home/agent/.config/autostart && \
@@ -84,7 +95,7 @@ RUN dnf autoremove -y && \
     rm -rf /var/cache/dnf/*
 
 # Set root password to "redhat" (testing only! STIG will override in production)
-RUN echo "redhat" | passwd --stdin root
+RUN echo "root:redhat" | chpasswd
 
 # Allow root login over SSH with password (testing only — STIG may override)
 RUN sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
