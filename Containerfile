@@ -11,7 +11,7 @@ gpgcheck=1
 gpgkey=https://dl.google.com/linux/linux_signing_key.pub
 EOF
 
-# Install minimal GNOME desktop components + browsers + tools
+# Install minimal GNOME desktop components individually + browsers + tools
 RUN dnf install -y --setopt=install_weak_deps=False \
     gdm \
     gnome-shell \
@@ -19,7 +19,6 @@ RUN dnf install -y --setopt=install_weak_deps=False \
     xorg-x11-server-Xwayland \
     mutter \
     gnome-control-center \
-    gnome-console \
     adwaita-icon-theme \
     adwaita-cursor-theme \
     NetworkManager-wifi \
@@ -72,13 +71,4 @@ RUN systemctl set-default graphical.target \
 
 # Allow root login over SSH with password (testing only)
 RUN sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
-
-# Optional: If you later want to re-enable STIG hardening, uncomment below
-# and test thoroughly – it often breaks graphical login / GDM
-#
-# RUN oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_stig \
-#     --remediate \
-#     /usr/share/xml/scap/ssg/content/ssg-cs10-ds.xml \
-#     && dnf remove -y openscap-scanner scap-security-guide \
-#     && dnf clean all
 
