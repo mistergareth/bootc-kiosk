@@ -39,6 +39,8 @@ RUN useradd -m agent \
     && usermod -aG wheel agent \
     && echo "agent" | passwd --stdin agent \
     && echo "redhat" | passwd --stdin root \
+    && mkdir -p /var/home/{agent,roothome}/.ssh \
+    && chown -R agent:agent /var/home/agent \
     && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/home/agent/.ssh/authorized_keys \
     && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/home/roothome/.ssh/authorized_keys
 
