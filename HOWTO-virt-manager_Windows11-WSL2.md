@@ -19,7 +19,7 @@ Ubuntu is the default WSL distro for a reason—it's the most polished for this 
 
 Stick with **Ubuntu 22.04 or 24.04 LTS** from the Microsoft Store:
 
-1. `wsl \--install \-d` Ubuntu (or search "Ubuntu" in Store).  
+1. `wsl --install -d` Ubuntu (or search "Ubuntu" in Store).  
 2. Update: sudo apt update && sudo apt upgrade  
 3. Install virt-manager stack: `sudo apt install virt-manager qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils`  
 4. Launch Virt-manager. It runs as a native Windows app via WSLg.
