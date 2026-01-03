@@ -55,7 +55,7 @@ RUN mkdir -p /var/home/agent/.config/autostart \
     && cat <<EOF > /var/home/agent/.config/autostart/chrome-kiosk.desktop
 [Desktop Entry]
 Type=Application
-Exec=google-chrome-stable --no-first-run --start-maximized https://everythingbreaks.com/
+Exec=google-chrome-stable --no-first-run --start-maximized --password-store=basic https://everythingbreaks.com/
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
@@ -70,13 +70,19 @@ x-scheme-handler/http=google-chrome.desktop
 x-scheme-handler/https=google-chrome.desktop
 x-scheme-handler/about=google-chrome.desktop
 x-scheme-handler/unknown=google-chrome.desktop
+EOF
 
 # Suppress Chrome first-run prompts (default browser + usage stats)
 RUN mkdir -p /var/home/agent/.config/google-chrome \
     && touch /var/home/agent/.config/google-chrome/"First Run" \
     && chown -R agent:agent /var/home/agent/.config
 
-# Set "chrome" short-name to start browser if needed
+# Prevent Chrome from prompting users to create keyring passwords by adding 
+# the --password-store=basic option to Chrome's global settings (will ensure
+# this for all Chrome launches, including manual)
+RUN sed -i '/^Exec=/s/$/ --password-store=basic/' /usr/share/applications/google-chrome.desktop
+
+# Set "chrome" short-name alias to start browser if needed
 RUN echo "alias chrome=/opt/google/chrome/google-chrome" >> ~agent/.bash_profile
 
 # Set graphical target + enable SSH
