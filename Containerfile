@@ -34,10 +34,16 @@ RUN dnf install -y --setopt=install_weak_deps=False \
 # Create kiosk user "agent" (home will be /var/home/agent automatically)
 # Add to wheel for sudo access (testing only)
 # Set passwords reliably
+# Preconfigure authorized SSH keys for secure access
 RUN useradd -m agent \
     && usermod -aG wheel agent \
     && echo "agent" | passwd --stdin agent \
-    && echo "redhat" | passwd --stdin root
+    && echo "redhat" | passwd --stdin root \
+    && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/home/agent/.ssh/authorized_keys \
+    && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/home/roothome/.ssh/authorized_keys
+
+# SSH key to enable secure access from laptop/host
+# ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM
 
 # Configure GDM: auto-login for agent + allow root graphical login (testing only)
 RUN mkdir -p /etc/gdm \
