@@ -7,3 +7,5 @@ create a bootable disk image (bootc) that is restricted in "kiosk" mode with
 only access to the browser for users to access their web-based tools but 
 nothing else.
 
+See the **HOWTO-virt-manager_Windows11-WSL2.md** document for steps to set up a
+native Linux libvirt/QEMU/KVM environment for VM testing on Windows 11 via WSL2.
