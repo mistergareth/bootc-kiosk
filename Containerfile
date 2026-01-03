@@ -52,16 +52,32 @@ EOF
 
 # Set Chrome kiosk autostart in correct persistent location
 RUN mkdir -p /var/home/agent/.config/autostart \
-    && chown -R agent:agent /var/home/agent/.config \
     && cat <<EOF > /var/home/agent/.config/autostart/chrome-kiosk.desktop
 [Desktop Entry]
 Type=Application
-Exec=google-chrome-stable --kiosk https://everythingbreaks.com/
+Exec=google-chrome-stable --no-first-run --start-maximized https://everythingbreaks.com/
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
 Name=Chrome Kiosk
 EOF
+
+# Set Chrome as default browser system-wide and for agent user
+RUN cat <<EOF > /var/home/agent/.config/mimeapps.list 
+[Default Applications]
+text/html=google-chrome.desktop
+x-scheme-handler/http=google-chrome.desktop
+x-scheme-handler/https=google-chrome.desktop
+x-scheme-handler/about=google-chrome.desktop
+x-scheme-handler/unknown=google-chrome.desktop
+
+# Suppress Chrome first-run prompts (default browser + usage stats)
+RUN mkdir -p /var/home/agent/.config/google-chrome \
+    && touch /var/home/agent/.config/google-chrome/"First Run" \
+    && chown -R agent:agent /var/home/agent/.config
+
+# Set "chrome" short-name to start browser if needed
+RUN echo "alias chrome=/opt/google/chrome/google-chrome" >> ~agent/.bash_profile
 
 # Set graphical target + enable SSH
 RUN systemctl set-default graphical.target \
