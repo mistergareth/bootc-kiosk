@@ -47,6 +47,17 @@ RUN useradd -m agent \
     && chown 700 /var/roothome/.ssh /var/home/agent/.ssh \
     && chown 600 /var/home/agent/.ssh/authorized_keys /var/roothome/.ssh/authorized_keys
 
+# Debug: Test if the SSH files were created since they are not showing up in image or failing during build.
+# May be overridden later in process:
+#RUN echo $(ls -la /var/home/agent/.ssh/ /var/roothome/.ssh/) || TRUE \
+RUN ls -la /var/home/agent/.ssh/ /var/roothome/.ssh/ || true
+
+RUN if [ -f /var/home/agent/.ssh/authorized_keys ] ; then echo "agent's authorized_keys file: "; cat /var/home/agent/.ssh/authorized_keys; \
+       else echo "agent's authorized_keys file not found"; fi \
+    && if [ -f /var/roothome/.ssh/authorized_keys ] ; then echo "root's authorized_keys file: "; cat /var/roothome/.ssh/authorized_keys; \
+       else echo "root's authorized_keys file not found"; fi
+
+
 # SSH key to enable secure access from laptop/host
 # ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM
 
