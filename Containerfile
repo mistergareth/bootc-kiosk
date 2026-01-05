@@ -39,10 +39,13 @@ RUN useradd -m agent \
     && usermod -aG wheel agent \
     && echo "agent" | passwd --stdin agent \
     && echo "redhat" | passwd --stdin root \
-    && mkdir -p /var/home/{agent,roothome}/.ssh \
+    && mkdir -p /var/home/agent/.ssh \
+    && mkdir -p /var/roothome/.ssh \
     && chown -R agent:agent /var/home/agent \
     && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/home/agent/.ssh/authorized_keys \
-    && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/home/roothome/.ssh/authorized_keys
+    && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> /var/roothome/.ssh/authorized_keys \
+    && chown 700 /var/roothome/.ssh /var/home/agent/.ssh \
+    && chown 600 /var/home/agent/.ssh/authorized_keys /var/roothome/.ssh/authorized_keys
 
 # SSH key to enable secure access from laptop/host
 # ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM
@@ -102,3 +105,5 @@ RUN sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
     && sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config \
     || echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 
+# Drop a version and date file for testing and validation
+RUN touch /usr/share/kiosk-upgraded-alpha8 && echo "Upgraded on $(date)" > /etc/kiosk-version
