@@ -135,25 +135,86 @@ To allow HTTP pulls.
    EOF
    ```
 
-## Step 8: Perform Bootc Switch and Upgrade in the VM
-1. In VM:
+# Updated Step-by-Step Procedure for Local Registry + Bootc Upgrades
+*(Including Rollback Verification)*
+
+## Step 8: Perform Bootc Switch, Upgrade, and Rollback Verification in the VM
+
+After completing Steps 1–7 (registry running, netsh proxy set, VM on Bridged Adapter with "Cable connected" checked, insecure registry configured in VM), follow these steps to test upgrades and **verify rollback functionality**.
+
+### 8.1 Initial Upgrade Test
+1. In the VM (using your host LAN IP, e.g., 192.168.1.155):
    ```
    sudo bootc switch 192.168.1.155:5000/my-kiosk:latest
-   sudo bootc status   # Confirm queued image
+   sudo bootc status          # Verify "Queued" shows the new image digest
    sudo bootc upgrade
    sudo reboot
    ```
 
-2. After reboot: Verify:
+2. After reboot:
    ```
-   sudo bootc status   # Booted into new image
+   sudo bootc status          # "Booted" should now show the new image digest
    ```
+   - Confirm your incremental change (e.g., test file, version marker) is present.
 
-3. Rollback test:
+### 8.2 Rollback Verification
+Bootc always keeps the previous deployment for safe rollback.
+
+1. Trigger rollback:
    ```
    sudo bootc rollback
+   sudo bootc status          # "Queued" now shows the previous image
    sudo reboot
    ```
+
+2. After reboot:
+   ```
+   sudo bootc status          # "Booted" back to previous digest
+   ```
+   - Verify:
+     - New changes from the upgrade are **gone** (immutable /usr reverted).
+     - Persistent data in `/etc` and `/var` (e.g., configs, logs) remains unchanged.
+
+### 8.3 Multi-Cycle Test (Recommended)
+Repeat the cycle with a new version tag (e.g., :alpha9):
+
+1. On host:
+   ```
+   podman build -t localhost:5000/my-kiosk:alpha9 .
+   podman push --tls-verify=false localhost:5000/my-kiosk:alpha9
+   ```
+
+2. In VM:
+   ```
+   sudo bootc switch 192.168.1.155:5000/my-kiosk:alpha9
+   sudo bootc upgrade
+   sudo reboot
+   # Verify new changes
+   sudo bootc rollback
+   sudo reboot
+   # Verify back to previous state
+   ```
+
+### 8.4 Expected bootc status Output Examples
+
+**After upgrade (new image applied):**
+```
+Booted: 192.168.1.155:5000/my-kiosk:latest@sha256:abc123...
+Previous: 192.168.1.155:5000/my-kiosk:latest@sha256:old456...
+```
+
+**After rollback:**
+```
+Booted: 192.168.1.155:5000/my-kiosk:latest@sha256:old456...
+Previous: 192.168.1.155:5000/my-kiosk:latest@sha256:abc123...
+```
+
+Rollback is atomic and safe — you can always go back to the prior known-good state.
+
+This completes the full local development lifecycle: build → push → switch → upgrade → verify → rollback.
+
+Save this updated document — it now includes the critical rollback verification steps that prove the immutability and reliability of your bootc kiosk image.
+
 
 ## Troubleshooting Tips
 - If push fails: Check `podman logs local-registry` for "blob unknown" — re-push with `--all-tags`.
