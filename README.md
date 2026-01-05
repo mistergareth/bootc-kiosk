@@ -9,3 +9,7 @@ nothing else.
 
 See the **HOWTO-virt-manager_Windows11-WSL2.md** document for steps to set up a
 native Linux libvirt/QEMU/KVM environment for VM testing on Windows 11 via WSL2.
+
+See the **HOWTO-Local_Registry_for_Bootc_Upgrades_Podman_Desktop_Windows_11.md**
+document for steps to create a local registry in Podman Desktop for bootc images.
+
