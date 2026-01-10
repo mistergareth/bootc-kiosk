@@ -49,20 +49,22 @@ RUN sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
 # For reference: Use this public SSH key to enable secure access from laptop/host:
 #       ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM
 RUN mkdir -p /etc/profile.d \
-    && cat <<EOF > /etc/profile.d/ssh-setup.sh
+    && cat <<'EOF' > /etc/profile.d/ssh-setup.sh
 #!/bin/bash
 # Create .ssh and authorized_keys if not exist (persists across upgrades)
 for user_dir in /var/home/agent /var/roothome; do
     if [ ! -d "\$user_dir/.ssh" ]; then
         mkdir -p "\$user_dir/.ssh"
         chmod 700 "\$user_dir/.ssh"
-        echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> "\$user_dir/.ssh/authorized_keys"
+	if [ grep -q "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" "\$user_dir/.ssh/authorized_keys" ]; then
+	    true
+	else echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> "\$user_dir/.ssh/authorized_keys"
         chmod 600 "\$user_dir/.ssh/authorized_keys"
     fi
 done
-chown -R agent:agent /var/home/agent/.ssh
-chown -R root:root /var/roothome/.ssh
-EOF \
+chown -R agent:agent /var/home/agent/.ssh 2>/dev/null || true
+chown -R root:root /var/roothome/.ssh 2>/dev/null || true
+EOF 
     && chmod 755 /etc/profile.d/ssh-setup.sh
 
 # Configure GDM: auto-login for agent + allow root graphical login (testing only)
@@ -76,18 +78,6 @@ AutomaticLogin=agent
 DisableRoot=false
 EOF
 
-# Set Chrome kiosk autostart in correct persistent location
-RUN mkdir -p /var/home/agent/.config/autostart \
-    && cat <<EOF > /var/home/agent/.config/autostart/chrome-kiosk.desktop
-[Desktop Entry]
-Type=Application
-Exec=google-chrome-stable --no-first-run --start-maximized --password-store=basic https://everythingbreaks.com/
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=Chrome Kiosk
-EOF
-
 # Set Chrome as default browser 
 RUN mkdir -p /var/home/agent/.config \
     && cat <<EOF > /var/home/agent/.config/mimeapps.list
@@ -97,8 +87,21 @@ x-scheme-handler/http=google-chrome.desktop
 x-scheme-handler/https=google-chrome.desktop
 x-scheme-handler/about=google-chrome.desktop
 x-scheme-handler/unknown=google-chrome.desktop
-EOF \
+EOF 
     && chown -R agent:agent /var/home/agent/.config
+
+# Set Chrome kiosk autostart in correct persistent location
+RUN mkdir -p /var/home/agent/.config/autostart \
+    && chown -R agent:agent /var/home/agent/.config \
+    && cat <<EOF > /var/home/agent/.config/autostart/chrome-kiosk.desktop
+[Desktop Entry]
+Type=Application
+Exec=google-chrome-stable --no-first-run --start-maximized --password-store=basic https://everythingbreaks.com/
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=Chrome Kiosk
+EOF
 
 # Suppress Chrome first-run prompts (default browser + usage stats)
 RUN mkdir -p /var/home/agent/.config/google-chrome \
