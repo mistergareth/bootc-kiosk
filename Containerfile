@@ -56,7 +56,7 @@ for user_dir in /var/home/agent /var/roothome; do
     if [ ! -d "\$user_dir/.ssh" ]; then
         mkdir -p "\$user_dir/.ssh"
         chmod 700 "\$user_dir/.ssh"
-	if [ grep -q "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" "\$user_dir/.ssh/authorized_keys" ]; then
+	if grep -q "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" "\$user_dir/.ssh/authorized_keys" ; then
 	    true
 	else echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> "\$user_dir/.ssh/authorized_keys"
         chmod 600 "\$user_dir/.ssh/authorized_keys"
