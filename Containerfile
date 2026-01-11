@@ -60,6 +60,7 @@ for user_dir in /var/home/agent /var/roothome; do
 	    true
 	else echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFEmXUGcj4QO1+Q7Anhvot5iK7U5oxK5K0a+XxZ4ZI8X Laptop@DESKTOP-VFB0HOM" >> "\$user_dir/.ssh/authorized_keys"
         chmod 600 "\$user_dir/.ssh/authorized_keys"
+	fi
     fi
 done
 chown -R agent:agent /var/home/agent/.ssh 2>/dev/null || true
